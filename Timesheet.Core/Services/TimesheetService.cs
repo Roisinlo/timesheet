@@ -40,13 +40,15 @@ public class TimesheetService : ITimesheetService
     public void DeleteEntry(Guid id)
     {
         var existingEntry = _entries.FirstOrDefault(e => e.Id == id);
-        if(existingEntry is null) throw new InvalidOperationException("Timesheet entry not found");
+        if(existingEntry is null) throw new InvalidOperationException("Timesheet entry not found.");
 
         _entries.Remove(existingEntry);
     }
 
     public IEnumerable<TimesheetEntry> GetEntriesForUserWeek(string userId, DateTime weekStart)
     {
+        if(string.IsNullOrWhiteSpace(userId)) throw new ArgumentException("Valid User Id is required.");
+        
         var start = WeekHelper.GetStartOfWeek(weekStart);
         var end = start.AddDays(7);
 
@@ -58,6 +60,9 @@ public class TimesheetService : ITimesheetService
 
     public decimal GetTotalHoursPerProject(string userId, string projectId, DateTime weekStart)
     {
+        if(string.IsNullOrWhiteSpace(userId)) throw new ArgumentException("Valid User Id is required.");
+        if(string.IsNullOrWhiteSpace(projectId)) throw new ArgumentException("Valid Project Id is required.");
+        
         var start = WeekHelper.GetStartOfWeek(weekStart);
         var end = start.AddDays(7);
 
@@ -82,6 +87,6 @@ public class TimesheetService : ITimesheetService
         return _entries.Any(e => 
                 e.UserId == entry.UserId &&
                 e.ProjectId == entry.ProjectId &&
-                e.Date == entry.Date.Date);
+                e.Date.Date == entry.Date.Date);
     }
 }
