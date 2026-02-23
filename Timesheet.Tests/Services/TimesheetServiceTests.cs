@@ -45,7 +45,8 @@ public class TimesheetServiceTests
             UserId = "1",
             ProjectId = "1",
             Date = DateTime.Today,
-            HoursWorked = 7.5m
+            HoursWorked = 7.5m,
+            Description = "Test"
         };
 
         _service.AddEntry(entry);
@@ -59,6 +60,7 @@ public class TimesheetServiceTests
         Assert.Equal(entry.ProjectId, addedEntry.ProjectId);
         Assert.Equal(entry.Date, addedEntry.Date.Date);
         Assert.Equal(entry.HoursWorked, addedEntry.HoursWorked);
+        Assert.Equal(entry.Description, addedEntry.Description);
     }
 
     //Update tests

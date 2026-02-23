@@ -35,6 +35,7 @@ public class TimesheetService : ITimesheetService
         existingEntry.ProjectId = entry.ProjectId;
         existingEntry.Date = entry.Date.Date;
         existingEntry.HoursWorked = entry.HoursWorked;
+        existingEntry.Description = entry.Description;
     }
 
     public void DeleteEntry(Guid id)

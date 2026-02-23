@@ -11,4 +11,5 @@ public class TimesheetEntry
     /// Hours worked in decimal format (e.g., 7.5). Must be > 0 and <= 24.
     /// </summary>
     public decimal HoursWorked { get; set; }
+    public string? Description {get; set;}
 }
