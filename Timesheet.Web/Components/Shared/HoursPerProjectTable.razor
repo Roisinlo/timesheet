@@ -1,0 +1,25 @@
+@using Timesheet.Core.Models
+
+<h3 class="mt-4">Hours per Project</h3>
+
+<table class="table table-striped table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Project</th>
+            <th>Total Hours</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var project in HoursPerProject)
+        {
+            <tr>
+                <td>@project.Key</td>
+                <td>@project.Value</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter] public Dictionary<string, decimal> HoursPerProject { get; set; } = new();
+}

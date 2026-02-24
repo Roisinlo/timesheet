@@ -1,0 +1,173 @@
+@page "/"
+@inject ITimesheetService TimesheetService
+@rendermode InteractiveServer
+
+<div class="container mt-4">
+    <h1 class="mb-4">Timesheet</h1>
+    @if (ShowAddForm)
+    {
+        <h2 class="mb-3">Add Entry</h2>
+        <EntryForm
+            Entry="NewEntry"
+            IsEdit="false"
+            OnSave="AddEntry"
+            OnCancel="() => ShowAddForm = false"
+            ErrorMessage="@AddErrorMessage" />
+    }
+    else if (ShowEditForm)
+    {
+        <h2 class="mb-3">Edit Entry</h2>
+        <EntryForm
+            Entry="EditingEntry"
+            IsEdit="true"
+            OnSave="SaveEdit"
+            OnCancel="() => ShowEditForm = false"
+            ErrorMessage="@EditErrorMessage" />
+    }
+    else
+    {
+        <div class="row g-3 align-items-end mb-4">
+            <div class="col-auto">
+                <label class="form-label">User ID</label>
+                <input type="text" class="form-control" @bind="UserId" />
+            </div>
+
+            <div class="col-auto">
+                <label class="form-label">Week Starting</label>
+                <input type="date" class="form-control" @bind="WeekStart" />
+            </div>
+
+            <div class="col-auto">
+                <button class="btn btn-primary me-2" @onclick="LoadEntries">Search</button>
+                <button class="btn btn-success" @onclick="OpenAddForm">Add Entry</button>
+            </div>
+        </div>
+
+        @if (ErrorMessage is not null)
+        {
+            <div class="alert alert-danger">@ErrorMessage</div>
+        }
+
+        @if (HasSearched)
+        {
+            @if (Entries.Any())
+            {
+                <EntryTable
+                    Entries="Entries"
+                    OnEdit="StartEdit"
+                    OnDelete="DeleteEntry" />
+
+                <HoursPerProjectTable HoursPerProject="HoursPerProject" />
+            }
+            else
+            {
+                <p class="text-muted">No entries found for this user and week.</p>
+            }
+        }
+    }
+</div>
+
+@code {
+    private string? UserId { get; set; }
+    private DateTime WeekStart { get; set; } = DateTime.Today;
+    private IEnumerable<TimesheetEntry> Entries { get; set; } = Enumerable.Empty<TimesheetEntry>();
+    private Dictionary<string, decimal> HoursPerProject { get; set; } = new();
+    private string? ErrorMessage { get; set; }
+    private bool HasSearched { get; set; } = false;
+
+    private bool ShowAddForm { get; set; } = false;
+    private TimesheetEntry NewEntry { get; set; } = new() { Date = DateTime.Today };
+    private string? AddErrorMessage { get; set; }
+
+    private bool ShowEditForm { get; set; } = false;
+    private TimesheetEntry EditingEntry { get; set; } = new();
+    private string? EditErrorMessage { get; set; }
+
+    private void LoadEntries()
+    {
+        ErrorMessage = null;
+        HasSearched = true;
+        try
+        {
+            Entries = TimesheetService.GetEntriesForUserWeek(UserId ?? "", WeekStart);
+
+            HoursPerProject = Entries
+                .GroupBy(e => e.ProjectId)
+                .ToDictionary(g => g.Key, g => g.Sum(e => e.HoursWorked));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    private void OpenAddForm()
+    {
+        AddErrorMessage = null;
+        NewEntry = new() { Date = DateTime.Today, HoursWorked = 0 };
+        ShowAddForm = true;
+    }
+
+    private void AddEntry(TimesheetEntry entry)
+    {
+        AddErrorMessage = null;
+        try
+        {
+            TimesheetService.AddEntry(entry);
+            UserId = entry.UserId;
+            WeekStart = entry.Date;
+            NewEntry = new();
+            ShowAddForm = false;
+            HasSearched = true;
+            LoadEntries();
+        }
+        catch (Exception ex)
+        {
+            AddErrorMessage = ex.Message;
+        }
+    }
+
+    private void StartEdit(Guid id)
+    {
+        var entry = Entries.First(e => e.Id == id);
+        EditingEntry = new TimesheetEntry
+        {
+            Id = entry.Id,
+            UserId = entry.UserId,
+            ProjectId = entry.ProjectId,
+            Date = entry.Date,
+            HoursWorked = entry.HoursWorked,
+            Description = entry.Description
+        };
+        ShowEditForm = true;
+    }
+
+    private void SaveEdit(TimesheetEntry entry)
+    {
+        EditErrorMessage = null;
+        try
+        {
+            TimesheetService.UpdateEntry(entry);
+            ShowEditForm = false;
+            LoadEntries();
+        }
+        catch (Exception ex)
+        {
+            EditErrorMessage = ex.Message;
+        }
+    }
+
+    private void DeleteEntry(Guid id)
+    {
+        ErrorMessage = null;
+        try
+        {
+            TimesheetService.DeleteEntry(id);
+            LoadEntries();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+}
