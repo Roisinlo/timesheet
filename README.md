@@ -58,7 +58,7 @@ Blazor frontend with components split by responsibility:
 
 ### Future Improvements
 
-- During manual testing I found a bug where a user could log more than 24 hours in a day across multiple projects. The current validation only checks that a single entry doesn't exceed 24 hours. In production this would require an additional validation to sum all hours for a user on a given day, across all projects.
+- During manual testing I found a bug where a user could log more than 24 hours in a day across multiple projects. The current validation only checks that a single entry doesn't exceed 24 hours. In production this would require an additional validation to sum all hours for a user on a given day, across all.
 
 - In production, `CreatedAt` and `LastModifiedAt` fields would be added to `TimesheetEntry` to for audit to track when entries were created and modified, and by who.
 
@@ -68,4 +68,4 @@ Blazor frontend with components split by responsibility:
 
 - The service uses `DateTime.Today` directly for future date validation, therefore in unit tests I have hard coded a date in the past to test from. In production this would be abstracted behind an `IDateTimeProvider` interface to allow better testing.
 
-- I would make the UI clearer- where the values for User Id and Week Starting are still held in the form when the entries and hours data is presented I would have that presented too e.g. \*Timesheet for **UserId** Week Commencing **Date\***
+- I would make the UI clearer- where the values for User Id and Week Starting are still held in the form when the entries and hours data is presented I would have that presented too e.g."Timesheet for [UserId] - Week Commencing [Date]"
